@@ -1,0 +1,37 @@
+<script type="text/html" data-help-name="roborock-map-image">
+    <p>Dessine la carte du robot en PNG, avec sa position, son trajet, la base, les zones interdites et les murs virtuels.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">scale <span class="property-type">nombre</span></dt>
+        <dd>Facteur de zoom de 1 à 10. Remplace le réglage du nœud. Lu aussi dans <code>msg.payload.scale</code>.</dd>
+        <dt class="optional">hideRooms <span class="property-type">chaîne | tableau</span></dt>
+        <dd>Pièces à masquer, par nom ou par numéro : <code>"Garage, 18"</code> ou <code>["Garage", 18]</code>. Remplace le réglage du nœud. Lu aussi dans <code>msg.payload.hideRooms</code>.</dd>
+        <dt class="optional">hideUnnamed <span class="property-type">booléen</span></dt>
+        <dd>Masque les pièces qui n'ont pas de nom. Remplace le réglage du nœud.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">buffer | chaîne</span></dt>
+        <dd>L'image PNG, en buffer, en texte base64 ou en URL <code>data:image/png;base64,...</code> selon le réglage du nœud.</dd>
+        <dt>map <span class="property-type">objet</span></dt>
+        <dd>
+            <code>robot</code> : position en mm et en pixels d'image, cap, et pièce où il se trouve (<code>room.id</code>, <code>room.name</code>).
+            <code>charger</code>, <code>rooms</code> (id, nom, centre en pixels d'image), <code>image</code> (largeur, hauteur, échelle),
+            <code>zones</code> (nombres), <code>pathPoints</code>, <code>status</code> et <code>fetchedAt</code>.
+        </dd>
+        <dt>status <span class="property-type">objet</span></dt>
+        <dd>L'état du robot (<code>state</code>, <code>battery</code>, <code>clean_area</code>…) plus <code>stateText</code> et <code>cleanAreaM2</code>.</dd>
+        <dt>device <span class="property-type">objet</span></dt>
+        <dd>Nom, DUID, modèle et IP de l'appareil.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <ul>
+        <li>La connexion au compte et les clés de l'appareil viennent du nœud <b>roborock device</b> et du nœud <b>roborock account</b> auquel il est lié. Rien à saisir deux fois.</li>
+        <li>La carte passe par le cloud Roborock (MQTT), comme l'intégration Home Assistant. Le contrôle local n'est pas utilisé.</li>
+        <li>Les noms de pièces apparaissent une fois les pièces nommées dans l'appli Roborock. Ils demandent le paquet de base <code>node-red-contrib-roborock-local</code> ; sans eux, les pièces n'ont qu'un numéro.</li>
+        <li><b>Masquer des pièces</b> : une pièce masquée est dessinée comme du simple sol et absente de <code>msg.map.rooms</code>, et le robot n'est plus signalé dedans. <code>msg.map.hiddenRooms</code> liste ce qui a été masqué et pourquoi (<code>name</code>, <code>id</code> ou <code>unnamed</code>). Une pièce sans nom ne peut être masquée que par son numéro ou avec <b>Masquer les sans-nom</b>. Si aucune pièce n'a de nom (noms indisponibles), cette option est ignorée et un avertissement est journalisé, pour ne jamais effacer toute la carte.</li>
+        <li>Seuls les appareils qui utilisent le protocole cloud <code>1.0</code> sont gérés.</li>
+        <li>Les demandes sont mises en file : une s'exécute, une attend, les autres sont ignorées. Ne déclenchez pas plus d'environ une fois par minute.</li>
+        <li>Pour l'afficher dans un dashboard, choisissez <b>URL de données</b> et un gabarit comme <code>&lt;img :src="msg.payload"&gt;</code>, ou servez le buffer avec un nœud de réponse HTTP de type <code>image/png</code>.</li>
+    </ul>
+</script>

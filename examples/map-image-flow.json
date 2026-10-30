@@ -1,0 +1,37 @@
+[
+  {
+    "id": "mi_tab", "type": "tab", "label": "Roborock carte (nœud)", "disabled": false,
+    "info": "Après import : double-cliquez sur le nœud « image de la carte » et choisissez votre appareil roborock."
+  },
+  {
+    "id": "mi_inject", "type": "inject", "z": "mi_tab", "name": "Carte toutes les 5 min",
+    "props": [{ "p": "payload" }], "repeat": "300", "crontab": "", "once": true, "onceDelay": "15",
+    "topic": "", "payload": "", "payloadType": "date", "x": 160, "y": 100, "wires": [["mi_map"]]
+  },
+  {
+    "id": "mi_map", "type": "roborock-map-image", "z": "mi_tab", "name": "", "device": "",
+    "output": "buffer", "scale": 3, "drawPath": true, "x": 390, "y": 100, "wires": [["mi_keep"]]
+  },
+  {
+    "id": "mi_keep", "type": "function", "z": "mi_tab", "name": "Garder le PNG",
+    "func": "// Garde l'image pour /roborock-map.png et passe l'état à la suite\nflow.set('roborockPng', msg.payload);\nmsg.robot = {\n    etat: msg.status && msg.status.stateText,\n    batterie: msg.status && msg.status.battery,\n    piece: msg.map.robot && msg.map.robot.room ? (msg.map.robot.room.name || ('pièce ' + msg.map.robot.room.id)) : null\n};\nreturn msg;",
+    "outputs": 1, "timeout": 0, "noerr": 0, "initialize": "", "finalize": "", "libs": [],
+    "x": 620, "y": 100, "wires": [["mi_debug"]]
+  },
+  {
+    "id": "mi_debug", "type": "debug", "z": "mi_tab", "name": "Robot", "active": true, "tosidebar": true,
+    "console": false, "tostatus": true, "complete": "robot", "targetType": "msg", "statusVal": "robot.piece",
+    "statusType": "msg", "x": 820, "y": 100, "wires": []
+  },
+  {
+    "id": "mi_http_in", "type": "http in", "z": "mi_tab", "name": "", "url": "/roborock-map.png",
+    "method": "get", "upload": false, "swaggerDoc": "", "x": 170, "y": 220, "wires": [["mi_http_fn"]]
+  },
+  {
+    "id": "mi_http_fn", "type": "function", "z": "mi_tab", "name": "Servir le PNG",
+    "func": "const png = flow.get('roborockPng');\nif (!png) {\n    msg.statusCode = 404;\n    msg.payload = 'Carte pas encore disponible';\n    msg.headers = { 'Content-Type': 'text/plain' };\n    return msg;\n}\nmsg.statusCode = 200;\nmsg.payload = png;\nmsg.headers = { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' };\nreturn msg;",
+    "outputs": 1, "timeout": 0, "noerr": 0, "initialize": "", "finalize": "", "libs": [],
+    "x": 400, "y": 220, "wires": [["mi_http_out"]]
+  },
+  { "id": "mi_http_out", "type": "http response", "z": "mi_tab", "name": "", "statusCode": "", "headers": {}, "x": 610, "y": 220, "wires": [] }
+]

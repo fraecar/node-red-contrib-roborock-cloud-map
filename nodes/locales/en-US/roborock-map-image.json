@@ -1,0 +1,23 @@
+{
+    "roborock-map-image": {
+        "name": "map image",
+        "label": {
+            "device": "Device",
+            "output": "Image as",
+            "scale": "Scale",
+            "drawPath": "Draw path",
+            "hideRooms": "Hide rooms",
+            "hideUnnamed": "Hide unnamed rooms"
+        },
+        "outputs": {
+            "buffer": "PNG buffer",
+            "base64": "base64 text",
+            "dataurl": "data URL (for <img src>)"
+        },
+        "output": "map image",
+        "tip": "Uses the account and device already set up for the roborock nodes. The map is fetched through the Roborock cloud, so the robot must be online. Do not trigger it more often than about once a minute. Rooms hidden here are drawn as plain floor and left out of msg.map.rooms. Names come from the Roborock app; a room without a name can only be hidden with Hide unnamed rooms or by its number.",
+        "placeholder": {
+            "hideRooms": "names or numbers, e.g. Garage, 18"
+        }
+    }
+}

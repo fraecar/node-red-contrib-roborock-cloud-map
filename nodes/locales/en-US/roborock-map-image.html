@@ -1,0 +1,37 @@
+<script type="text/html" data-help-name="roborock-map-image">
+    <p>Draws the robot's map as a PNG, with the robot position, its path, the dock, no-go zones and virtual walls.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">scale <span class="property-type">number</span></dt>
+        <dd>Zoom factor from 1 to 10. Overrides the node setting. Also read from <code>msg.payload.scale</code>.</dd>
+        <dt class="optional">hideRooms <span class="property-type">string | array</span></dt>
+        <dd>Rooms to hide, by name or number: <code>"Garage, 18"</code> or <code>["Garage", 18]</code>. Overrides the node setting. Also read from <code>msg.payload.hideRooms</code>.</dd>
+        <dt class="optional">hideUnnamed <span class="property-type">boolean</span></dt>
+        <dd>Hide rooms that have no name. Overrides the node setting.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">buffer | string</span></dt>
+        <dd>The PNG image, as a buffer, base64 text, or a <code>data:image/png;base64,...</code> URL, depending on the node setting.</dd>
+        <dt>map <span class="property-type">object</span></dt>
+        <dd>
+            <code>robot</code>: position in mm and in image pixels, heading, and the room it is in (<code>room.id</code>, <code>room.name</code>).
+            <code>charger</code>, <code>rooms</code> (id, name, centre in image pixels), <code>image</code> (width, height, scale),
+            <code>zones</code> (counts), <code>pathPoints</code>, <code>status</code> and <code>fetchedAt</code>.
+        </dd>
+        <dt>status <span class="property-type">object</span></dt>
+        <dd>The robot status (<code>state</code>, <code>battery</code>, <code>clean_area</code>...) plus <code>stateText</code> and <code>cleanAreaM2</code>.</dd>
+        <dt>device <span class="property-type">object</span></dt>
+        <dd>Name, DUID, model and IP of the device.</dd>
+    </dl>
+    <h3>Details</h3>
+    <ul>
+        <li>The account login and the device keys are taken from the <b>roborock device</b> node and the <b>roborock account</b> node it points to. Nothing to enter twice.</li>
+        <li>The map goes through the Roborock cloud (MQTT), like the Home Assistant integration. Local control is not used.</li>
+        <li>Room names appear once the rooms are named in the Roborock app. They need the base <code>node-red-contrib-roborock-local</code> package; without them the rooms have ids only.</li>
+        <li><b>Hiding rooms</b>: a hidden room is drawn as plain floor and left out of <code>msg.map.rooms</code>, and the robot is no longer reported inside it. <code>msg.map.hiddenRooms</code> lists what was hidden and why (<code>name</code>, <code>id</code> or <code>unnamed</code>). A room that has no name can only be hidden by its number or with <b>Hide unnamed rooms</b>. If no room at all has a name (names unavailable), that option is skipped and a warning is logged, so the map is never blanked.</li>
+        <li>Only devices that use the cloud protocol <code>1.0</code> are supported.</li>
+        <li>Requests are queued: one runs, one waits, the rest are ignored. Do not trigger more often than about once a minute.</li>
+        <li>Show the image in a dashboard with the <b>data URL</b> setting and a template such as <code>&lt;img :src="msg.payload"&gt;</code>, or serve the buffer from an HTTP response node with the content type <code>image/png</code>.</li>
+    </ul>
+</script>

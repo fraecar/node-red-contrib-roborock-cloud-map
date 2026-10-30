@@ -1,0 +1,23 @@
+{
+    "roborock-map-image": {
+        "name": "image de la carte",
+        "label": {
+            "device": "Appareil",
+            "output": "Image en",
+            "scale": "Échelle",
+            "drawPath": "Tracer le trajet",
+            "hideRooms": "Masquer des pièces",
+            "hideUnnamed": "Masquer les sans-nom"
+        },
+        "outputs": {
+            "buffer": "Buffer PNG",
+            "base64": "texte base64",
+            "dataurl": "URL de données (pour <img src>)"
+        },
+        "output": "image de la carte",
+        "tip": "Utilise le compte et l'appareil déjà configurés pour les nœuds roborock. La carte passe par le cloud Roborock : l'aspirateur doit être en ligne. Ne la demandez pas plus d'environ une fois par minute. Les pièces masquées sont dessinées comme du simple sol et absentes de msg.map.rooms. Les noms viennent de l'appli Roborock ; une pièce sans nom ne peut être masquée que par « Masquer les sans-nom » ou par son numéro.",
+        "placeholder": {
+            "hideRooms": "noms ou numéros, ex. Garage, 18"
+        }
+    }
+}

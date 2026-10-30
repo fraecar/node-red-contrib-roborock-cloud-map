@@ -1,0 +1,67 @@
+<script type="text/html" data-template-name="roborock-map-image">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-device"><i class="fa fa-android"></i> <span data-i18n="roborock-map-image.label.device"></span></label>
+        <input type="text" id="node-input-device">
+    </div>
+    <div class="form-row">
+        <label for="node-input-output"><i class="fa fa-picture-o"></i> <span data-i18n="roborock-map-image.label.output"></span></label>
+        <select id="node-input-output">
+            <option value="buffer" data-i18n="roborock-map-image.outputs.buffer"></option>
+            <option value="base64" data-i18n="roborock-map-image.outputs.base64"></option>
+            <option value="dataurl" data-i18n="roborock-map-image.outputs.dataurl"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-scale"><i class="fa fa-search-plus"></i> <span data-i18n="roborock-map-image.label.scale"></span></label>
+        <input type="number" id="node-input-scale" min="1" max="10" step="1" style="width:80px">
+    </div>
+    <div class="form-row">
+        <label for="node-input-drawPath"><i class="fa fa-road"></i> <span data-i18n="roborock-map-image.label.drawPath"></span></label>
+        <input type="checkbox" id="node-input-drawPath" style="display:inline-block; width:auto; vertical-align:top;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-hideRooms"><i class="fa fa-eye-slash"></i> <span data-i18n="roborock-map-image.label.hideRooms"></span></label>
+        <input type="text" id="node-input-hideRooms" data-i18n="[placeholder]roborock-map-image.placeholder.hideRooms">
+    </div>
+    <div class="form-row">
+        <label for="node-input-hideUnnamed"><i class="fa fa-question-circle"></i> <span data-i18n="roborock-map-image.label.hideUnnamed"></span></label>
+        <input type="checkbox" id="node-input-hideUnnamed" style="display:inline-block; width:auto; vertical-align:top;">
+    </div>
+    <div class="form-tips" data-i18n="roborock-map-image.tip"></div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType("roborock-map-image", {
+        category: "Roborock",
+        color: "#c0392b",
+        defaults: {
+            name: { value: "" },
+            device: { value: "", type: "roborock-device", required: true },
+            output: { value: "buffer" },
+            scale: {
+                value: 3,
+                validate: function (v) {
+                    return v === "" || (!isNaN(Number(v)) && Number(v) >= 1 && Number(v) <= 10);
+                }
+            },
+            drawPath: { value: true },
+            hideRooms: { value: "" },
+            hideUnnamed: { value: false }
+        },
+        inputs: 1,
+        outputs: 1,
+        outputLabels: function () { return this._("roborock-map-image.output"); },
+        icon: "roborock-map.svg",
+        paletteLabel: "map image",
+        label: function () {
+            return this.name || this._("roborock-map-image.name");
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        }
+    });
+</script>

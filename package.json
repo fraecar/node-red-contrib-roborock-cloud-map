@@ -1,0 +1,37 @@
+{
+  "name": "node-red-contrib-roborock-cloud-map",
+  "version": "0.2.0",
+  "description": "Add-on for node-red-contrib-roborock-local: a node that draws the Roborock map (PNG) with the robot position, using the account and device you already configured.",
+  "keywords": [
+    "node-red",
+    "roborock",
+    "vacuum",
+    "map",
+    "home-automation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "lib/",
+    "nodes/",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ],
+  "node-red": {
+    "version": ">=3.0.0",
+    "nodes": {
+      "roborock-map-image": "nodes/roborock-map-image.js"
+    }
+  },
+  "peerDependencies": {
+    "node-red-contrib-roborock-local": ">=0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "node-red-contrib-roborock-local": {
+      "optional": true
+    }
+  }
+}
