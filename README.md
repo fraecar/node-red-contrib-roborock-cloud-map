@@ -1,78 +1,88 @@
 # node-red-contrib-roborock-cloud-map
 
-Module complémentaire de [`node-red-contrib-roborock-local`](https://flows.nodered.org/node/node-red-contrib-roborock-local).
-Il ajoute à la catégorie **Roborock** un nœud **image de la carte** (`roborock-map-image`) qui dessine la carte de
-l'aspirateur en PNG, avec sa position, son trajet, la base, les zones interdites et les murs virtuels.
+[Français](README.fr.md) · English
 
-- **Rien à configurer en double** : le nœud utilise le nœud *roborock device* (DUID, clé locale) et le nœud
-  *roborock account* (connexion déjà enregistrée) que vous avez déjà.
-- **Aucune dépendance** npm.
-- La carte passe par le **cloud Roborock** (MQTT), comme l'intégration Home Assistant. Le contrôle local n'est pas utilisé.
-- Appareils au protocole cloud `1.0` (série S, Qrevo, Saros…).
+> **Unofficial project.** This package is **not affiliated with, endorsed by, or connected to Roborock** in any way.
+> It was **written with [Claude](https://claude.ai)**, an AI assistant made by Anthropic.
+> It uses Roborock's unofficial cloud interface, which can change or stop working at any time. Use it at your own risk.
+
+An add-on for [`node-red-contrib-roborock-local`](https://flows.nodered.org/node/node-red-contrib-roborock-local).
+It adds a **map image** node (`roborock-map-image`) to the **Roborock** category of the palette. The node draws the
+vacuum's map as a PNG, with the robot's position, its path, the dock, no-go zones and virtual walls.
+
+- **Nothing to enter twice**: the node uses the *roborock device* node (DUID, local key) and the *roborock account*
+  node (saved login) you already have.
+- **No npm dependencies.**
+- The map goes through the **Roborock cloud** (MQTT), like the Home Assistant integration. Local control is not used.
+- Works with devices that use the cloud protocol `1.0` (S series, Qrevo, Saros...).
 
 ## Installation
 
-Le paquet de base `node-red-contrib-roborock-local` doit déjà être installé et votre compte connecté.
+The base package `node-red-contrib-roborock-local` must already be installed and your account signed in.
 
 ```bash
 cd ~/.node-red
-npm install /chemin/vers/node-red-contrib-roborock-cloud-map-0.1.0.tgz
-# puis redémarrer Node-RED
+npm install /path/to/node-red-contrib-roborock-cloud-map-0.2.0.tgz
+# then restart Node-RED
 ```
 
-Le nœud apparaît dans la palette, catégorie **Roborock**, sous le nom *map image*.
+The node appears in the palette, category **Roborock**, as *map image*.
 
-## Utilisation
+## Usage
 
-Glissez le nœud, choisissez votre **appareil** (le même que pour les autres nœuds roborock), envoyez-lui un message.
-Exemple de flow : `examples/map-image-flow.json` (déclenchement toutes les 5 minutes + image servie sur `/roborock-map.png`).
+Drop the node into a flow, pick your **device** (the same one the other roborock nodes use), and send it a message.
+A sample flow is in `examples/map-image-flow.json` (a trigger every 5 minutes, plus the image served at `/roborock-map.png`).
 
-### Sorties
+### Outputs
 
-| Propriété | Contenu |
+| Property | Content |
 | --- | --- |
-| `msg.payload` | l'image PNG : buffer, texte base64 ou URL `data:image/png;base64,…` (réglage du nœud) |
-| `msg.map` | `robot` (position en mm et en pixels, cap, pièce `room.id` / `room.name`), `charger`, `rooms` (id, nom, centre en pixels), `image` (largeur, hauteur, échelle), `zones`, `pathPoints`, `status`, `fetchedAt` |
-| `msg.status` | état du robot (`state`, `battery`, `clean_area`…) + `stateText`, `cleanAreaM2` |
-| `msg.device` | nom, DUID, modèle, IP |
+| `msg.payload` | the PNG image: a buffer, base64 text, or a `data:image/png;base64,...` URL (node setting) |
+| `msg.map` | `robot` (position in mm and in image pixels, heading, and the room it is in as `room.id` / `room.name`), `charger`, `rooms` (id, name, centre in pixels), `image` (width, height, scale), `zones`, `pathPoints`, `hiddenRooms`, `warnings`, `status`, `fetchedAt` |
+| `msg.status` | robot status (`state`, `battery`, `clean_area`...) plus `stateText` and `cleanAreaM2` |
+| `msg.device` | name, DUID, model, IP |
 
-Entrées facultatives (aussi lues dans `msg.payload`, et elles remplacent les réglages du nœud) :
-`msg.scale` (zoom de 1 à 10), `msg.hideRooms` (pièces à masquer), `msg.hideUnnamed` (booléen).
+Optional inputs (also read from `msg.payload`; they override the node settings):
+`msg.scale` (zoom from 1 to 10), `msg.hideRooms` (rooms to hide), `msg.hideUnnamed` (boolean).
 
-### Masquer des pièces
+### Hiding rooms
 
-Deux réglages dans le nœud :
+Useful when rooms you deleted in the Roborock app still show up on the map. Two settings on the node:
 
-- **Masquer des pièces** : des noms ou des numéros séparés par des virgules, par exemple `Garage, 18`. Les noms ignorent
-  la casse et les accents.
-- **Masquer les sans-nom** : masque toutes les pièces qui n'ont pas de nom dans l'appli Roborock.
+- **Hide rooms**: names or numbers separated by commas, for example `Garage, 18`. Names ignore case and accents.
+- **Hide unnamed rooms**: hides every room that has no name in the Roborock app.
 
-Une pièce masquée est dessinée comme du simple sol, absente de `msg.map.rooms`, et le robot n'est plus signalé dedans.
-`msg.map.hiddenRooms` liste ce qui a été masqué et pourquoi (`name`, `id` ou `unnamed`).
-Si aucune pièce de la carte n'a de nom (noms indisponibles), « masquer les sans-nom » est ignoré et un avertissement
-est journalisé : la carte n'est jamais effacée par erreur.
+A hidden room is drawn as plain floor and left out of `msg.map.rooms`, and the robot is no longer reported inside it.
+`msg.map.hiddenRooms` lists what was hidden and why (`name`, `id` or `unnamed`).
+If no room on the map has a name (names unavailable), *hide unnamed rooms* is skipped and a warning is logged,
+so the map is never blanked by mistake.
 
-### Dans un dashboard
+### In a dashboard
 
-Réglez la sortie sur **URL de données** et utilisez un `ui-template` :
+Set the output to **data URL** and use a `ui-template`:
 
 ```html
 <template><img :src="msg.payload" style="max-width:100%"></template>
 ```
 
-## Limites
+## Limits
 
-- N'appelez pas plus d'**une fois par minute** environ. Les demandes sont mises en file : une s'exécute, une attend, les autres sont ignorées.
-- Les **noms de pièces** apparaissent si les pièces sont nommées dans l'appli Roborock et si le paquet de base est présent. Sinon, seuls les numéros sont fournis.
-- Les noms de pièces ne sont pas dessinés sur l'image (pas de police embarquée) ; `msg.map.rooms` donne leurs positions.
-- Non officiel, sans lien avec Roborock.
+- Do not trigger it more than about **once a minute**. Requests are queued: one runs, one waits, the rest are ignored.
+- **Room names** appear when the rooms are named in the Roborock app and the base package is installed. Otherwise you only get room numbers.
+- Room names are not drawn on the image (no embedded font); `msg.map.rooms` gives their positions.
+- Tested with automated tests (a simulated Node-RED and a simulated MQTT broker), not on every robot model.
+  Reports from real hardware are welcome in the issues.
 
-## Crédits
+## Credits and license
 
-Le protocole et le format de carte sont des portages de python-roborock et vacuum-map-parser-roborock (Apache-2.0),
-via le portage JavaScript du projet saugi (MIT, Michael Krisper).
+MIT license. The cloud protocol and the map format are ports of
+[python-roborock](https://github.com/Python-roborock/python-roborock) and
+[vacuum-map-parser-roborock](https://github.com/PiotrMachowski/Python-package-vacuum-map-parser-roborock) (Apache-2.0),
+through the JavaScript port in the [saugi](https://github.com/michaelkrisper/saugi) project (MIT).
 
-## Historique
+Written with [Claude](https://claude.ai) (Anthropic). Not affiliated with Roborock.
 
-- **0.2.0** : masquer des pièces par nom, par numéro ou « sans nom ».
-- **0.1.0** : première version.
+## Changelog
+
+- **0.2.0**: hide rooms by name, by number, or "unnamed".
+- **0.1.0**: first release.
